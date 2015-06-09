@@ -1,0 +1,50 @@
+@import url("reset.css");
+@import url("../vendor/font-awesome/css/font-awesome.css");
+@import url("../vendor/simplegrid/simplegrid.css");
+@import url("fonts.css");
+@import url("general.css");
+@import url("topBar.css");
+@import url("chat.css");
+@import url("tabs.css");
+@import url("gamesLog.css");
+@import url("controlsSelector.css");
+@import url("controls.css");
+@import url("strategy.css");
+@import url("betBar.css");
+@import url("chart.css");
+@import url("chartControls.css");
+@import url("players.css");
+@import url("animations.css");
+/*@import url("whiteTheme.css");*/
+
+
+/**
+ *
+ * Header Background/ Widget Border Color: #292d35
+ * Widget Background Color: #181a1e
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+
+/**
+Quick Guidelines:
+    - when there is a div just to hold a react component
+        - inner-container: is the div that the react components returns
+        - just-container: is the div that contains a react component
+    - when the component is a sibling on a bigger components the react component just returns a container
+**/
