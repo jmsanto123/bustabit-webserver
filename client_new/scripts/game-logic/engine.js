@@ -13,7 +13,6 @@ define([
     AppConstants,
     AppDispatcher
 ) {
-
     function Engine() {
         var self = this;
 
@@ -25,6 +24,15 @@ define([
         _.extend(this, Events);
 
         self.ws = io(AppConstants.Engine.HOST);
+
+        //Dev functions
+        //window.disconnect = function() {
+        //    self.ws.io.disconnect();
+        //};
+        //
+        //window.reconnect = function() {
+        //    self.ws.io.connect();
+        //};
 
         /** The engine is connected to the server, if not connected, all fields are unreadable */
         self.isConnected = false;
@@ -39,7 +47,7 @@ define([
         self.maxBet = AppConstants.Engine.MAX_BET;
 
         /** Array containing chat history */
-        self.chat = [];
+        //self.chat = [];
 
         /** Object containing the game history */
         self.tableHistory = [];
@@ -71,6 +79,7 @@ define([
         self.maxWin = null;
 
         /**
+         * Client side times:
          * if the game is pending, startTime is how long till it starts
          * if the game is running, startTime is how long its running for
          * if the game is ended, startTime is how long since the game started
@@ -81,7 +90,7 @@ define([
         self.timeTillStart = null;
 
         /** If you are currently placing a bet
-         * True if the bet is queued
+         * True if the bet is queued (nextBetAmount)
          * True if the bet was sent to the server but the server has not responded yet
          *
          * Cleared in game_started, its possible to receive this event before receiving the response of
@@ -106,10 +115,11 @@ define([
         /** Tell if the game is lagging but only  when the game is in progress **/
         self.lag = false;
 
+        /** The hash of the last game **/
+        self.lastHash = null;
+
         /** Animation Events triggers**/
         self.nyan = false;
-
-
 
         /**
          * Events triggered by the engine
@@ -137,8 +147,6 @@ define([
          */
 
 
-
-
         /**
          * Event called at the moment when the game starts
          */
@@ -155,11 +163,13 @@ define([
             self.nextBetAmount = null;
             self.nextAutoCashout = null;
 
+            //Create the player info object with bet and username
+            //If you are in the bets rest your bet from your balance
             Object.keys(bets).forEach(function(username) {
                 if (self.username === username)
                     self.balanceSatoshis -= bets[username];
 
-                self.playerInfo[username] = { bet: bets[username] };
+                self.playerInfo[username] = { bet: bets[username], username: username };
             });
 
             self.calcBonuses();
@@ -171,7 +181,7 @@ define([
          * Event called each 150ms telling the client the game is still alive
          * @param {number} data - elapsed time
          */
-        self.ws.on('game_tick', function(data) {
+        self.ws.on('game_tick', function(elapsed) {
             /** Time of the last tick received */
             self.lastGameTick = Date.now();
             if(self.lag === true){
@@ -179,13 +189,18 @@ define([
                 self.trigger('lag_change');
             }
 
+            /** Correct the time of startTime every gameTick **/
+            var currentLatencyStartTime = self.lastGameTick - elapsed;
+            if(self.startTime>currentLatencyStartTime)
+                self.startTime = currentLatencyStartTime;
+
             if(self.tickTimer)
                 clearTimeout(self.tickTimer);
 
             self.tickTimer = setTimeout(self.checkForLag.bind(self), AppConstants.Engine.STOP_PREDICTING_LAPSE);
 
             //Check for animation triggers
-            if(data > AppConstants.Animations.NYAN_CAT_TRIGGER_MS && !self.nyan) {
+            if(elapsed > AppConstants.Animations.NYAN_CAT_TRIGGER_MS && !self.nyan) {
                 self.nyan = true;
                 self.trigger('nyan_cat_animation');
             }
@@ -337,20 +352,20 @@ define([
          * @param {role} string - admin, moderator, user
          * @param {message} string - Da message
          */
-        self.ws.on('msg', function(data) {
-            //The chat only renders if the Arr length is diff, remove blocks of the array
-            if (self.chat.length > AppConstants.Chat.MAX_LENGTH)
-                self.chat.splice(0, 400);
-
-            // Match @username until end of string or invalid username char
-            var r = new RegExp('@' + self.username + '(?:$|[^a-z0-9_\-])', 'i');
-            if (data.type === 'say' && data.username !== self.username && r.test(data.message)) {
-                new Audio('/sounds/gong.mp3').play();
-            }
-            self.chat.push(data);
-
-            self.trigger('msg', data);
-        });
+        //self.ws.on('msg', function(data) {
+        //    //The chat only renders if the Arr length is diff, remove blocks of the array
+        //    if (self.chat.length > AppConstants.Chat.MAX_LENGTH)
+        //        self.chat.splice(0, 400);
+        //
+        //    // Match @username until end of string or invalid username char
+        //    var r = new RegExp('@' + self.username + '(?:$|[^a-z0-9_\-])', 'i');
+        //    if (data.type === 'say' && data.username !== self.username && r.test(data.message)) {
+        //        new Audio('/sounds/gong.mp3').play();
+        //    }
+        //    self.chat.push(data);
+        //
+        //    self.trigger('msg', data);
+        //});
 
         /** Triggered by the server to let users the have to reload the page */
         self.ws.on('update', function() {
@@ -360,16 +375,11 @@ define([
         self.ws.on('connect', function() {
 
             requestOtt(function(err, ott) {
-                if (err) {
-                    /* If the error is 401 means the user is not logged in
-                     * Todo: This will be fixed in the near future
-                     */
-                    if (err != 401) {
-                        console.error('request ott error:', err);
-                        if (confirm("An error, click to reload the page: " + err))
-                            location.reload();
-                        return;
-                    }
+                if (err && err != 401) { // If the error is 401 means the user is not logged in
+                    console.error('request ott error:', err);
+                    if (confirm("An error, click to reload the page: " + err))
+                        location.reload();
+                    return;
                 }
 
                 //If there is a Dev ott use it
@@ -381,7 +391,7 @@ define([
                         }
 
                         self.balanceSatoshis = resp.balance_satoshis;
-                        self.chat = resp.chat;
+                        //self.chat = resp.chat;
 
                         /** If username is a falsey value the user is not logged in */
                         self.username = resp.username;
@@ -403,10 +413,16 @@ define([
                         if (self.gameState === 'IN_PROGRESS')
                             self.lastGameTick = Date.now();
 
-                        if (self.gameState === 'IN_PROGRESS' || self.gameState === 'ENDED')
-                            self.calcBonuses();
+                    	//Attach username to each user for sorting proposes 
+                    	for(var user in self.playerInfo) {
+                    		self.playerInfo[user].username = user;
+                    	}
 
-
+                    	//Calculate the bonuses of the current game if necessary
+                        if (self.gameState === 'IN_PROGRESS' || self.gameState === 'ENDED'){
+                        	self.calcBonuses();
+                        }
+                            
                         self.trigger('connected');
                     }
                 );
@@ -433,10 +449,10 @@ define([
      * Sends chat message
      * @param {string} msg - String containing the message, should be longer than 1 and shorter than 500.
      */
-    Engine.prototype.say = function(msg) {
-        console.assert(msg.length > 1 && msg.length < 500);
-        this.ws.emit('say', msg);
-    };
+    //Engine.prototype.say = function(msg) {
+    //    console.assert(msg.length > 1 && msg.length < 500);
+    //    this.ws.emit('say', msg);
+    //};
 
     /**
      * Places a bet with a giving amount.
@@ -466,7 +482,7 @@ define([
         this.trigger('bet_queued');
     };
 
-    // Actually bet. Throw the bet at the server.
+    /** Throw the bet at the server **/
     Engine.prototype.doBet =  function(amount, autoCashOut, callback) {
         var self = this;
 
@@ -491,9 +507,7 @@ define([
         self.trigger('placing_bet');
     };
 
-    /**
-     * Cancels a bet, if the game state is able to do it so
-     */
+    /** Cancels a bet, if the game state is able to do it so */
     Engine.prototype.cancelBet = function() {
         if (!this.nextBetAmount)
             return console.error('Can not cancel next bet, wasn\'t going to make it...');
@@ -521,33 +535,6 @@ define([
     };
 
     /**
-     * Returns the game payout as a percentage if game is in progress
-     * if the game is not in progress returns null.
-     *
-     * Used by the script-controller
-     *
-     * If the last was time exceed the STOP_PREDICTING_LAPSE constant
-     * It returns the last game tick elapsed time + the STOP_PREDICTING_LAPSE
-     * This will cause the graph or others to stops if there is lag.
-     * Only call this function if the game is 'IN_PROGRESS'.
-     * Use it for render, strategy, etc.
-     * @return {number}
-     */
-    Engine.prototype.getGamePayout = function() {
-        if(!(this.gameState === 'IN_PROGRESS'))
-            return null;
-
-        if((Date.now() - this.lastGameTick) < AppConstants.Engine.STOP_PREDICTING_LAPSE) {
-            var elapsed = Date.now() - this.startTime;
-        } else {
-            var elapsed = this.lastGameTick - this.startTime + AppConstants.Engine.STOP_PREDICTING_LAPSE; //+ STOP_PREDICTING_LAPSE because it looks better
-        }
-        var gamePayout = Clib.growthFunc(elapsed);
-        console.assert(isFinite(gamePayout));
-        return gamePayout;
-    };
-
-    /**
      * If the game crashed at zero x remove the bonus projections by setting bonuses to zero.
      */
     Engine.prototype.setBonusesToZero = function() {
@@ -557,7 +544,7 @@ define([
     };
 
     /**
-     * Calculate the bonuses based on player info and append them to it
+     * Calculate the bonuses based on player info and append them to it on connect, cashed_out and game_started
      **/
     Engine.prototype.calcBonuses = function() {
         var self = this;
@@ -630,31 +617,6 @@ define([
 
     };
 
-    /** If the user is currently playing return and object with the status else null **/
-    Engine.prototype.currentPlay = function() {
-        if (!this.username)
-            return null;
-        else
-            return this.playerInfo[this.username];
-    };
-
-    /** True if you are playing and haven't cashed out **/
-    Engine.prototype.currentlyPlaying = function() {
-        var currentPlay = this.currentPlay();
-        return currentPlay && currentPlay.bet && !currentPlay.stopped_at;
-    };
-
-    /** To Know if the user is betting **/
-    Engine.prototype.isBetting = function() {
-        if (!this.username) return false;
-        if (this.nextBetAmount) return true;
-        for (var i = 0 ; i < this.joined.length; ++i) {
-            if (this.joined[i] == this.username)
-                return true;
-        }
-        return false;
-    };
-
     /**
      * Function to request the one time token to the server
      */
@@ -713,10 +675,10 @@ define([
             case AppConstants.ActionTypes.CASH_OUT:
                 EngineSingleton.cashOut();
                 break;
-
-            case AppConstants.ActionTypes.SAY_CHAT:
-                EngineSingleton.say(action.msg);
-                break;
+            //
+            //case AppConstants.ActionTypes.SAY_CHAT:
+            //    EngineSingleton.say(action.msg);
+            //    break;
 
         }
 

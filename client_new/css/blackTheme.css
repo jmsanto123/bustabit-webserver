@@ -3,7 +3,7 @@ html, body {
 
 body {
     color: white;
-    background: #21242a;
+    background: #181a1e;
 }
 
 ::-webkit-scrollbar-corner {
@@ -103,6 +103,10 @@ body {
     background-color: rgb(240, 238, 238);
 }
 
+#controls-inner-container .bet-input-group>input:disabled {
+	background-color: #BBBBBB;
+}
+
 
 /* ==========================================================================
    chat.css
@@ -120,9 +124,13 @@ body {
     opacity: 0.6;
 }
 
+.messages-container .loading-container, .messages-container .spinner-pre-loader {
+    background-image: url('../img/loading-black.gif');
+}
+
 
 /* ==========================================================================
-   tabs.css
+   tabsSelector.css
    ========================================================================== */
 
 #tabs-inner-container .widget-container {
@@ -131,19 +139,85 @@ body {
 
 #tabs-inner-container, #tabs-inner-container .log-chat-container {
     border-color: #292d35;
-    /*color: black;*/
 }
 
-#tabs-inner-container .tab-container li.chat-log-tab.tab-active {
-    background-color: #181a1e;
-}
-
-#tabs-inner-container .tab-container li.chat-log-tab {
+#tabs-inner-container .tab-container li.tab.col-3, #tabs-inner-container .tab-container li.tab.col-4 {
     background-color: #292d35;
 }
 
-#tabs-inner-container .tab-container li.chat-log-tab a {
+#tabs-inner-container .tab-container li.tab.tab-active {
+    background-color: #181a1e;
+}
+
+#tabs-inner-container .tab-container li.tab {
+	background-color: #292d35;
+}
+
+#tabs-inner-container .tab-container li.tab a {
     color: #b0b3c1;
+}
+
+#tabs-inner-container .tab-container .tab-settings {
+    background-color: #292d35;
+}
+
+#tabs-inner-container .tab-container .tab-settings.tab-active {
+    background-color: #181a1e;
+}
+
+
+/* ==========================================================================
+   settingsSelector.css
+   ========================================================================== */
+
+#settings-selector-container .tab-holder {
+    background-color: #292d35;
+}
+
+#settings-selector-container .tab-holder.tab-active {
+    background-color: #181a1e;
+}
+
+#settings-selector-container .tab-holder a {
+    color: #b0b3c1;
+}
+
+
+/* ==========================================================================
+   hotkeysSettings.css
+   ========================================================================== */
+
+#hotkeys-settings-container .hotkeys-list span:nth-of-type(odd) {
+    background-color: #202328;
+}
+
+
+/* ==========================================================================
+   displaySettings.css
+   ========================================================================== */
+
+#display-settings-container .option-row:nth-of-type(even) {
+    background-color: #202328;
+}
+
+#display-settings-container select {
+    background-color: #292d35;
+    border-color: #292d35;
+    color: white;
+}
+
+/* ==========================================================================
+   chatSettings.css
+   ========================================================================== */
+
+#chat-settings-container .option-row:nth-of-type(even) {
+    background-color: #202328;
+}
+
+#chat-settings-container select {
+    background-color: #292d35;
+    border-color: #292d35;
+    color: white;
 }
 
 
@@ -167,6 +241,19 @@ body {
 
 #strategy-container .auto-bet-container input[type="text"] {
     color: white;
+}
+
+#strategy-container .auto-bet-container>div:nth-of-type(even) {
+    background-color: #202328;
+}
+
+#strategy-container .strategy-input {
+    background-color: transparent;
+    color: white;
+}
+
+#strategy-container .strategy-input:disabled {
+    color: grey;
 }
 
 

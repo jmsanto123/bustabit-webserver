@@ -2,7 +2,7 @@
 @import url("general.css");
 @import url("topBar.css");
 @import url("chat.css");
-@import url("tabs.css");
+@import url("tabsSelector.css");
 @import url("gamesLog.css");
 @import url("controlsSelector.css");
 @import url("controls.css");
@@ -11,6 +11,12 @@
 @import url("chart.css");
 @import url("chartControls.css");
 @import url("players.css");
+@import url("settingsSelector.css");
+@import url("textDisplay.css");
+@import url("displaySettings.css");
+@import url("hotkeysSettings.css");
+@import url("chatSettings.css");
+@import url("loading.css");
 
 /**
  * Header Background/ Widget Border Color: #292d35
@@ -62,7 +68,8 @@ html, body {
 
 #game-message-container>span {
     overflow-y: hidden;
-
+    padding-right: 20px;
+    display: block;
 }
 
 #game-message-container span>span, #game-message-container span>a {
@@ -98,16 +105,21 @@ html, body {
     cursor: pointer;
 }
 
-#game-message-container .close-message i{
+#game-message-container .close-message i {
     color: white;
     font-size: 0.8rem;
     line-height: 1.2rem;
     padding-right: 0.2rem;
 }
+@media handheld, only screen and (max-width: 767px) {
+    #game-message-container .close-message i {
+        font-size: 1rem;
+    }
+}
 
 #game-message-container {
     text-align: center;
-
+    z-index: 999;
 }
 
 #game-inner-container {
@@ -119,7 +131,7 @@ html, body {
 #game-left-container {
     display: table;
     height: 100%;
-    width: 70%;
+    width: 65%;
     position: relative;
 }
 
@@ -131,7 +143,7 @@ html, body {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 70%;
+    left: 65%;
     right: 0;
     border: 1px solid #ddd;
     margin: 5px;
@@ -167,6 +179,32 @@ html, body {
 
 #chart-controls-col, #tabs-controls-col {
     display: table-cell;
-    height: 50%;
+}
+
+#tabs-controls-col .cell-wrapper, #chart-controls-col .cell-wrapper {
+    height: 100%;
+    width: 100%;
     position: relative;
+}
+
+#chart-controls-col {
+    height: 45%;
+}
+
+#tabs-controls-col {
+    height: 55%;
+}
+
+/* Big Screens with small controls */
+@media handheld, only screen and (min-width: 767px) {
+    #chart-controls-col.small {
+        height: 10%;
+    
+}
+}
+/* Small Screens with small controls */
+@media handheld, only screen and (max-width: 767px) {
+    #chart-controls-col.small {
+        height: 20%;
+    }
 }

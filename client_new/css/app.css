@@ -18,6 +18,12 @@ body {
 /* Top bar
    ========================================================================== */
 
+@media screen and (max-width: 767px) {
+    header {
+        height: 5rem;
+    }
+}
+
 #top-bar {
     position: static;
     top: inherit;
@@ -44,6 +50,59 @@ body {
     position: relative;
     margin-top: 1rem;
 }
+
+#top-bar .menu, #top-bar .menu-mobile {
+    float: right;
+    margin-right: 3rem;
+}
+
+#top-bar .nav-list {
+    line-height: 40px;
+    
+    padding: 0;
+    margin: 0;
+}
+
+#top-bar .nav-item {
+    display: inline-block;
+
+    padding-right: 1rem;
+}
+
+#top-bar .nav-item a {
+    line-height: 40px;
+    color: black;
+    font-size: 20px;
+}
+
+@media screen and (max-width: 767px) {
+	#top-bar .menu {
+		position: absolute;
+		top: 40px;
+		right: 0;
+		left: 0;
+		text-align: center;
+		margin-right: 0;
+	} 	
+
+	#top-bar .user-login .login {
+		padding-right: 0.5rem;
+	}	
+
+	#top-bar .user-login .register {
+		padding-right: 0.5rem;
+	}
+
+	#top-bar .title h1 {
+		padding-left: 0.5rem;
+	}
+
+	.page-content {
+		margin-top: 2rem;
+	}
+}
+
+
 
 
 /* Message wrappers
@@ -182,10 +241,6 @@ table {
 
 .data b, .data h5 {
     color: #FDFDFD;
-}
-
-.user-login a {
-    margin-right: 5px;
 }
 
 .panel {

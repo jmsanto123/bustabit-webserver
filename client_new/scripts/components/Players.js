@@ -52,8 +52,6 @@ define([
         },
 
         _onChange: function() {
-            //Check if its mounted because when Game view receives the disconnect event from EngineVirtualStore unmounts all views
-            //and the views unregister their events before the event dispatcher dispatch them with the disconnect event
             if(this.isMounted())
                 this.setState(getState());
         },
@@ -85,7 +83,6 @@ define([
                 });
             } else {
                 _.forEach(game.playerInfo, function (player, username) {
-                    player.username = username;
 
                     if (player.stopped_at)
                         usersWonCashed.push(player);
